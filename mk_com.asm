@@ -1,19 +1,12 @@
 .model small
-	
+
 .code
 
-	org    100H	
+org 100h
 
-	begin:
-		jmp    main
+start:
 
-	main PROC far
+    mov ax, 09h
+		mov dx, 01h
 
-		mov    ax, 09H
-
-	main ENDP
-	
-end begin
-
-;; tasm mk_com
-;; tlink /t mk_com
+end start

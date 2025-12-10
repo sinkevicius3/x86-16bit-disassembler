@@ -1,6 +1,10 @@
 # Prerequisites
 *.d
 
+# Test files
+*.com
+output.asm
+
 # Object files
 *.o
 *.ko
