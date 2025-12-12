@@ -44,9 +44,6 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
   saved_disp_low            db 0                 ; saved displacement low byte
   saved_disp_high           db 0                 ; saved displacement high byte
 
-  mov_byte_ptr_str          db 'mov byte ptr '
-  mov_word_ptr_str          db 'mov word ptr '
-
 .code
   start:
     mov ax, @data
@@ -278,6 +275,10 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       
       check_mov_opcodes:
         mov al, bl
+
+        ; [XLAT] (D7h ~ 1101 0111)
+        cmp al, 0D7h
+        je handle_xlat
 
         ; [RCR reg/mem8, 1] (D0h ~ 1101 0000, reg field = 011)
         cmp al, 0D0h
@@ -568,7 +569,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         mov [di], al
         inc di
         call pad_to_mnemonic
-        call write_mov_byte_ptr                 ; write "mov byte ptr "
+        call write_mov_string
         mov al, saved_modrm
         mov bl, 0                               ; 0 = 8-bit
         call decode_modrm_rm
@@ -611,7 +612,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         mov [di], al
         inc di
         call pad_to_mnemonic
-        call write_mov_word_ptr                 ; write "mov word ptr "
+        call write_mov_string
         mov al, saved_modrm
         mov bl, 1                               ; 1 = 16-bit
         call decode_modrm_rm
@@ -1050,6 +1051,18 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         add offset_value, 2
         jmp write_output
 
+      ; [XLAT] (D7h ~ 1101 0111)
+      handle_xlat:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call pad_to_mnemonic
+        call write_xlat_string                  ; write "xlat"
+        inc offset_value
+        jmp write_output
+
       ; [RCR reg/mem8, 1] (D0h ~ 1101 0000)
       handle_rcr_D0:
         mov al, bl
@@ -1347,36 +1360,6 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ret
     write_mov_string ENDP
 
-    ; Output: writes "mov byte ptr " to output buffer
-    write_mov_byte_ptr PROC near
-      push ax si cx
-      mov si, offset mov_byte_ptr_str
-      mov cx, 13                                ; length of "mov byte ptr " is 13
-      wmb_loop:
-        mov al, [si]
-        mov [di], al
-        inc si
-        inc di
-        loop wmb_loop
-      pop cx si ax
-      ret
-    write_mov_byte_ptr ENDP
-
-    ; Output: writes "mov word ptr " to output buffer
-    write_mov_word_ptr PROC near
-      push ax si cx
-      mov si, offset mov_word_ptr_str
-      mov cx, 13                                ; length of "mov word ptr " is 13
-      wmw_loop:
-        mov al, [si]
-        mov [di], al
-        inc si
-        inc di
-        loop wmw_loop
-      pop cx si ax
-      ret
-    write_mov_word_ptr ENDP
-
     ; Output: writes "out " to output buffer
     write_out_string PROC near
       push ax
@@ -1421,6 +1404,21 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       pop ax
       ret
     write_rcr_string ENDP
+
+     ; Output: writes "xlat" to output buffer
+    write_xlat_string PROC near
+      push ax
+      mov byte ptr [di], 'x'
+      inc di
+      mov byte ptr [di], 'l'
+      inc di
+      mov byte ptr [di], 'a'
+      inc di
+      mov byte ptr [di], 't'
+      inc di
+      pop ax
+      ret
+    write_xlat_string ENDP
 
     ; Input: saved_modrm contains the ModR/M byte
     ; Output: displacement bytes written to output and saved in saved_disp_low/saved_disp_high

@@ -32,7 +32,7 @@ start:
     nop
 
     mov al, 42h
-    mov word ptr [bx+di+100h], 0CDEFh
+    mov [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
 
     nop
@@ -45,6 +45,8 @@ start:
     
     mov ax, 1234h
     out 80h, ax
+
+    nop
 
     not al
     not bl
@@ -59,6 +61,8 @@ start:
     not byte ptr [bx+si]
     not word ptr [bp+10h]
 
+    nop
+
     rcr al, 1 
     rcr bl, 1
     rcr ax, 1 
@@ -69,6 +73,12 @@ start:
     rcr ax, cl
     
     rcr byte ptr es:[bx], 1
+
+    nop
+
+    xlat
+    xlat
+    xlat
     
     mov ah, 4Ch
     int 21h
