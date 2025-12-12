@@ -277,81 +277,94 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         mov bl, al                              ; update opcode
       
       check_mov_opcodes:
-      mov al, bl
+        mov al, bl
 
-      ; [OUT imm8, AL] (E6h ~ 1110 0110)
-      cmp al, 0E6h
-      je handle_out_E6
-      ; [OUT imm8, AX] (E7h ~ 1110 0111)
-      cmp al, 0E7h
-      je handle_out_E7
-      
-      ; [OUT DX, AL] (EEh ~ 1110 1110)
-      cmp al, 0EEh
-      je handle_out_EE
-      ; [OUT DX, AX] (EFh ~ 1110 1111)
-      cmp al, 0EFh
-      je handle_out_EF
-      
-      ; [MOV reg/mem8, reg8] (88h ~ 1000 1000)
-      cmp al, 88h
-      je handle_mov_88
-      ; [MOV reg/mem16, reg16] (89h ~ 1000 1001)
-      cmp al, 89h
-      je handle_mov_89
-      ; [MOV reg8, reg/mem8] (8Ah ~ 1000 1010)
-      cmp al, 8Ah
-      je handle_mov_8A
-      ; [MOV reg16, reg/mem16] (8Bh ~ 1000 1011)
-      cmp al, 8Bh
-      je handle_mov_8B
-      
-      ; [MOV reg, immediate] (B0h-BFh ~ 1011 wreg)
-      cmp al, 0B0h
-      jl not_mov_imm
-      cmp al, 0BFh
-      jg not_mov_imm
-      jmp handle_mov_imm
-      
+        ; [RCR reg/mem8, 1] (D0h ~ 1101 0000, reg field = 011)
+        cmp al, 0D0h
+        je handle_rcr_D0
+        ; [RCR reg/mem16, 1] (D1h ~ 1101 0001, reg field = 011)
+        cmp al, 0D1h
+        je handle_rcr_D1
+        ; [RCR reg/mem8, CL] (D2h ~ 1101 0010, reg field = 011)
+        cmp al, 0D2h
+        je handle_rcr_D2
+        ; [RCR reg/mem16, CL] (D3h ~ 1101 0011, reg field = 011)
+        cmp al, 0D3h
+        je handle_rcr_D3
+
+        ; [OUT imm8, AL] (E6h ~ 1110 0110)
+        cmp al, 0E6h
+        je handle_out_E6
+        ; [OUT imm8, AX] (E7h ~ 1110 0111)
+        cmp al, 0E7h
+        je handle_out_E7
+        
+        ; [OUT DX, AL] (EEh ~ 1110 1110)
+        cmp al, 0EEh
+        je handle_out_EE
+        ; [OUT DX, AX] (EFh ~ 1110 1111)
+        cmp al, 0EFh
+        je handle_out_EF
+        
+        ; [MOV reg/mem8, reg8] (88h ~ 1000 1000)
+        cmp al, 88h
+        je handle_mov_88
+        ; [MOV reg/mem16, reg16] (89h ~ 1000 1001)
+        cmp al, 89h
+        je handle_mov_89
+        ; [MOV reg8, reg/mem8] (8Ah ~ 1000 1010)
+        cmp al, 8Ah
+        je handle_mov_8A
+        ; [MOV reg16, reg/mem16] (8Bh ~ 1000 1011)
+        cmp al, 8Bh
+        je handle_mov_8B
+        
+        ; [MOV reg, immediate] (B0h-BFh ~ 1011 wreg)
+        cmp al, 0B0h
+        jl not_mov_imm
+        cmp al, 0BFh
+        jg not_mov_imm
+        jmp handle_mov_imm
+        
       not_mov_imm:
-      ; [MOV mem/reg8, immediate] (C6h ~ 1100 0110)
-      cmp al, 0C6h
-      je handle_mov_C6
-      ; [MOV mem/reg16, immediate] (C7h ~ 1100 0111)
-      cmp al, 0C7h
-      je handle_mov_C7
-      
-      ; [MOV AL, memory] (A0h ~ 1010 0000)
-      cmp al, 0A0h
-      je handle_mov_A0
-      ; [MOV AX, memory] (A1h ~ 1010 0001)
-      cmp al, 0A1h
-      je handle_mov_A1
-      
-      ; [MOV memory, AL] (A2h ~ 1010 0010)
-      cmp al, 0A2h
-      je handle_mov_A2
-      ; [MOV memory, AX] (A3h ~ 1010 0011)
-      cmp al, 0A3h
-      je handle_mov_A3
+        ; [MOV mem/reg8, immediate] (C6h ~ 1100 0110)
+        cmp al, 0C6h
+        je handle_mov_C6
+        ; [MOV mem/reg16, immediate] (C7h ~ 1100 0111)
+        cmp al, 0C7h
+        je handle_mov_C7
+        
+        ; [MOV AL, memory] (A0h ~ 1010 0000)
+        cmp al, 0A0h
+        je handle_mov_A0
+        ; [MOV AX, memory] (A1h ~ 1010 0001)
+        cmp al, 0A1h
+        je handle_mov_A1
+        
+        ; [MOV memory, AL] (A2h ~ 1010 0010)
+        cmp al, 0A2h
+        je handle_mov_A2
+        ; [MOV memory, AX] (A3h ~ 1010 0011)
+        cmp al, 0A3h
+        je handle_mov_A3
 
-      ; [MOV reg/mem, segment reg] (8Ch ~ 1000 1100)
-      cmp al, 8Ch
-      je handle_mov_8C
+        ; [MOV reg/mem, segment reg] (8Ch ~ 1000 1100)
+        cmp al, 8Ch
+        je handle_mov_8C
 
-      ; [MOV segment reg, reg/mem] (8Eh ~ 1000 1110)
-      cmp al, 8Eh
-      je handle_mov_8E
+        ; [MOV segment reg, reg/mem] (8Eh ~ 1000 1110)
+        cmp al, 8Eh
+        je handle_mov_8E
 
-      ; [NOT reg/mem8] (F6h ~ 1111 0110, reg field = 010)
-      cmp al, 0F6h
-      je handle_not_F6
-      ; [NOT reg/mem16] (F7h ~ 1111 0111, reg field = 010)
-      cmp al, 0F7h
-      je handle_not_F7
-      
-      ; Unrecognized instruction
-      jmp handle_unrecognized
+        ; [NOT reg/mem8] (F6h ~ 1111 0110, reg field = 010)
+        cmp al, 0F6h
+        je handle_not_F6
+        ; [NOT reg/mem16] (F7h ~ 1111 0111, reg field = 010)
+        cmp al, 0F7h
+        je handle_not_F7
+        
+        ; Unrecognized instruction
+        jmp handle_unrecognized
       
       ; [MOV reg/mem8, reg8] (88h ~ 1000 1000)
       handle_mov_88:
@@ -1037,6 +1050,226 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         add offset_value, 2
         jmp write_output
 
+      ; [RCR reg/mem8, 1] (D0h ~ 1101 0000)
+      handle_rcr_D0:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get ModR/M byte
+        jc disasm_end
+        mov saved_modrm, al
+        call write_hex_byte                     ; write ModR/M byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        
+        ; Check if reg field = 011 (RCR instruction)
+        mov al, saved_modrm
+        shr al, 3
+        and al, 07h                             ; extract reg field
+        cmp al, 3                               ; must be 011 (3)
+        jne handle_unrecognized_d0              ; if not, it's a different D0 instruction
+        
+        call read_displacement
+        call pad_to_mnemonic
+        call write_rcr_string                   ; write "rcr "
+        mov al, saved_modrm
+        mov bl, 0                               ; 0 = 8-bit operand
+        call decode_modrm_rm                    ; write operand (r/m field)
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], '1'
+        inc di
+        add offset_value, 2
+        jmp write_output
+        
+      handle_unrecognized_d0:
+        call pad_to_mnemonic
+        mov byte ptr [di], 'U'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'k'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'o'
+        inc di
+        mov byte ptr [di], 'w'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
+      ; [RCR reg/mem16, 1] (D1h ~ 1101 0001)
+      handle_rcr_D1:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get ModR/M byte
+        jc disasm_end
+        mov saved_modrm, al
+        call write_hex_byte                     ; write ModR/M byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        
+        ; Check if reg field = 011 (RCR instruction)
+        mov al, saved_modrm
+        shr al, 3
+        and al, 07h                             ; extract reg field
+        cmp al, 3                               ; must be 011 (3)
+        jne handle_unrecognized_d1              ; if not, it's a different D1 instruction
+        
+        call read_displacement
+        call pad_to_mnemonic
+        call write_rcr_string                   ; write "rcr "
+        mov al, saved_modrm
+        mov bl, 1                               ; 1 = 16-bit operand
+        call decode_modrm_rm                    ; write operand (r/m field)
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], '1'
+        inc di
+        add offset_value, 2
+        jmp write_output
+        
+      handle_unrecognized_d1:
+        call pad_to_mnemonic
+        mov byte ptr [di], 'U'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'k'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'o'
+        inc di
+        mov byte ptr [di], 'w'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
+      ; [RCR reg/mem8, CL] (D2h ~ 1101 0010)
+      handle_rcr_D2:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get ModR/M byte
+        jc disasm_end
+        mov saved_modrm, al
+        call write_hex_byte                     ; write ModR/M byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        
+        ; Check if reg field = 011 (RCR instruction)
+        mov al, saved_modrm
+        shr al, 3
+        and al, 07h                             ; extract reg field
+        cmp al, 3                               ; must be 011 (3)
+        jne handle_unrecognized_d2              ; if not, it's a different D2 instruction
+        
+        call read_displacement
+        call pad_to_mnemonic
+        call write_rcr_string                   ; write "rcr "
+        mov al, saved_modrm
+        mov bl, 0                               ; 0 = 8-bit operand
+        call decode_modrm_rm                    ; write operand (r/m field)
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], 'C'
+        inc di
+        mov byte ptr [di], 'L'
+        inc di
+        add offset_value, 2
+        jmp write_output
+        
+      handle_unrecognized_d2:
+        call pad_to_mnemonic
+        mov byte ptr [di], 'U'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'k'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'o'
+        inc di
+        mov byte ptr [di], 'w'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
+      ; [RCR reg/mem16, CL] (D3h ~ 1101 0011)
+      handle_rcr_D3:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get ModR/M byte
+        jc disasm_end
+        mov saved_modrm, al
+        call write_hex_byte                     ; write ModR/M byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        
+        ; Check if reg field = 011 (RCR instruction)
+        mov al, saved_modrm
+        shr al, 3
+        and al, 07h                             ; extract reg field
+        cmp al, 3                               ; must be 011 (3)
+        jne handle_unrecognized_d3              ; if not, it's a different D3 instruction
+        
+        call read_displacement
+        call pad_to_mnemonic
+        call write_rcr_string                   ; write "rcr "
+        mov al, saved_modrm
+        mov bl, 1                               ; 1 = 16-bit operand
+        call decode_modrm_rm                    ; write operand (r/m field)
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], 'C'
+        inc di
+        mov byte ptr [di], 'L'
+        inc di
+        add offset_value, 2
+        jmp write_output
+        
+      handle_unrecognized_d3:
+        call pad_to_mnemonic
+        mov byte ptr [di], 'U'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'k'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'o'
+        inc di
+        mov byte ptr [di], 'w'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
       ; Unrecognized byte - output as "Unknown"
       handle_unrecognized:
         mov al, bl
@@ -1173,6 +1406,21 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       pop ax
       ret
     write_not_string ENDP
+
+    ; Output: writes "rcr " to output buffer
+    write_rcr_string PROC near
+      push ax
+      mov byte ptr [di], 'r'
+      inc di
+      mov byte ptr [di], 'c'
+      inc di
+      mov byte ptr [di], 'r'
+      inc di
+      mov byte ptr [di], ' '
+      inc di
+      pop ax
+      ret
+    write_rcr_string ENDP
 
     ; Input: saved_modrm contains the ModR/M byte
     ; Output: displacement bytes written to output and saved in saved_disp_low/saved_disp_high

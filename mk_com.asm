@@ -58,6 +58,17 @@ start:
     not word ptr [bx]
     not byte ptr [bx+si]
     not word ptr [bp+10h]
+
+    rcr al, 1 
+    rcr bl, 1
+    rcr ax, 1 
+    rcr word ptr [bx], 1 
+    
+    rcr al, cl
+    rcr byte ptr [bx+si], cl
+    rcr ax, cl
+    
+    rcr byte ptr es:[bx], 1
     
     mov ah, 4Ch
     int 21h
