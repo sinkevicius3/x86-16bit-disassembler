@@ -278,6 +278,20 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       
       check_mov_opcodes:
       mov al, bl
+
+      ; [OUT imm8, AL] (E6h ~ 1110 0110)
+      cmp al, 0E6h
+      je handle_out_E6
+      ; [OUT imm8, AX] (E7h ~ 1110 0111)
+      cmp al, 0E7h
+      je handle_out_E7
+      
+      ; [OUT DX, AL] (EEh ~ 1110 1110)
+      cmp al, 0EEh
+      je handle_out_EE
+      ; [OUT DX, AX] (EFh ~ 1110 1111)
+      cmp al, 0EFh
+      je handle_out_EF
       
       ; [MOV reg/mem8, reg8] (88h ~ 1000 1000)
       cmp al, 88h
@@ -812,6 +826,108 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         inc offset_value
         jmp write_output
 
+      ; [OUT imm8, AL] (E6h ~ 1110 0110)
+      handle_out_E6:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get immediate port number
+        jc disasm_end
+        mov cl, al                              ; save port in CL
+        call write_hex_byte                     ; write port byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        call pad_to_mnemonic
+        call write_out_string                   ; write "out "
+        mov al, cl
+        call write_hex_byte                     ; write port number
+        mov byte ptr [di], 'h'
+        inc di
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], 'A'
+        inc di
+        mov byte ptr [di], 'L'
+        inc di
+        add offset_value, 2                     ; opcode + immediate byte
+        jmp write_output
+
+      ; [OUT imm8, AX] (E7h ~ 1110 0111)
+      handle_out_E7:
+        mov al, bl
+        call write_hex_byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get immediate port number
+        jc disasm_end
+        mov cl, al
+        call write_hex_byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        call pad_to_mnemonic
+        call write_out_string
+        mov al, cl
+        call write_hex_byte
+        mov byte ptr [di], 'h'
+        inc di
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], 'A'
+        inc di
+        mov byte ptr [di], 'X'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
+      ; [OUT DX, AL] (EEh ~ 1110 1110)
+      handle_out_EE:
+        mov al, bl
+        call write_hex_byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        call pad_to_mnemonic
+        call write_out_string
+        mov byte ptr [di], 'D'
+        inc di
+        mov byte ptr [di], 'X'
+        inc di
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], 'A'
+        inc di
+        mov byte ptr [di], 'L'
+        inc di
+        inc offset_value
+        jmp write_output
+
+      ; [OUT DX, AX] (EFh ~ 1110 1111)
+      handle_out_EF:
+        mov al, bl
+        call write_hex_byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        call pad_to_mnemonic
+        call write_out_string
+        mov byte ptr [di], 'D'
+        inc di
+        mov byte ptr [di], 'X'
+        inc di
+        mov byte ptr [di], ','
+        inc di
+        mov byte ptr [di], 'A'
+        inc di
+        mov byte ptr [di], 'X'
+        inc di
+        inc offset_value
+        jmp write_output  
+
       ; Unrecognized byte - output as "Unknown"
       handle_unrecognized:
         mov al, bl
@@ -918,6 +1034,21 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       pop cx si ax
       ret
     write_mov_word_ptr ENDP
+
+    ; Output: writes "out " to output buffer
+    write_out_string PROC near
+      push ax
+      mov byte ptr [di], 'o'
+      inc di
+      mov byte ptr [di], 'u'
+      inc di
+      mov byte ptr [di], 't'
+      inc di
+      mov byte ptr [di], ' '
+      inc di
+      pop ax
+      ret
+    write_out_string ENDP
 
     ; Input: saved_modrm contains the ModR/M byte
     ; Output: displacement bytes written to output and saved in saved_disp_low/saved_disp_high

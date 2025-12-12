@@ -34,6 +34,19 @@ start:
     mov al, 42h
     mov word ptr [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
+
+    nop
+
+    out 60h, al          ; E6 60
+    out 70h, ax          ; E7 70
+    
+    ; Test OUT DX port
+    out dx, al           ; EE
+    out dx, ax           ; EF
+    
+    ; Test with segment prefix
+    mov ax, 1234h        ; B8 34 12
+    out 80h, ax          ; E7 80
     
     mov ah, 4Ch
     int 21h
