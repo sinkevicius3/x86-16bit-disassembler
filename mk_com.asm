@@ -37,16 +37,27 @@ start:
 
     nop
 
-    out 60h, al          ; E6 60
-    out 70h, ax          ; E7 70
+    out 60h, al
+    out 70h, ax
     
-    ; Test OUT DX port
-    out dx, al           ; EE
-    out dx, ax           ; EF
+    out dx, al
+    out dx, ax
     
-    ; Test with segment prefix
-    mov ax, 1234h        ; B8 34 12
-    out 80h, ax          ; E7 80
+    mov ax, 1234h
+    out 80h, ax
+
+    not al
+    not bl
+    not cl
+    
+    not ax
+    not bx
+    not cx
+    
+    not byte ptr [bx]
+    not word ptr [bx]
+    not byte ptr [bx+si]
+    not word ptr [bp+10h]
     
     mov ah, 4Ch
     int 21h

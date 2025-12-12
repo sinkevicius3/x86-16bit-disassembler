@@ -342,6 +342,13 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV segment reg, reg/mem] (8Eh ~ 1000 1110)
       cmp al, 8Eh
       je handle_mov_8E
+
+      ; [NOT reg/mem8] (F6h ~ 1111 0110, reg field = 010)
+      cmp al, 0F6h
+      je handle_not_F6
+      ; [NOT reg/mem16] (F7h ~ 1111 0111, reg field = 010)
+      cmp al, 0F7h
+      je handle_not_F7
       
       ; Unrecognized instruction
       jmp handle_unrecognized
@@ -928,6 +935,108 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         inc offset_value
         jmp write_output  
 
+       ; [NOT reg/mem8] (F6h ~ 1111 0110)
+      handle_not_F6:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get ModR/M byte
+        jc disasm_end
+        mov saved_modrm, al
+        call write_hex_byte                     ; write ModR/M byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        
+        ; Check if reg field = 010 (NOT instruction)
+        mov al, saved_modrm
+        shr al, 3
+        and al, 07h                             ; extract reg field
+        cmp al, 2                               ; must be 010 (2)
+        jne handle_unrecognized_f6              ; if not, it's a different F6 instruction
+        
+        call read_displacement
+        call pad_to_mnemonic
+        call write_not_string                   ; write "not "
+        mov al, saved_modrm
+        mov bl, 0                               ; 0 = 8-bit operand
+        call decode_modrm_rm                    ; write operand (r/m field)
+        add offset_value, 2
+        jmp write_output
+        
+      handle_unrecognized_f6:
+        ; F6 with different reg field - treat as unknown
+        call pad_to_mnemonic
+        mov byte ptr [di], 'U'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'k'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'o'
+        inc di
+        mov byte ptr [di], 'w'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
+      ; [NOT reg/mem16] (F7h ~ 1111 0111)
+      handle_not_F7:
+        mov al, bl
+        call write_hex_byte                     ; write opcode
+        mov al, ' '
+        mov [di], al
+        inc di
+        call get_next_byte                      ; get ModR/M byte
+        jc disasm_end
+        mov saved_modrm, al
+        call write_hex_byte                     ; write ModR/M byte
+        mov al, ' '
+        mov [di], al
+        inc di
+        
+        ; Check if reg field = 010 (NOT instruction)
+        mov al, saved_modrm
+        shr al, 3
+        and al, 07h                             ; extract reg field
+        cmp al, 2                               ; must be 010 (2)
+        jne handle_unrecognized_f7              ; if not, it's a different F7 instruction
+        
+        call read_displacement
+        call pad_to_mnemonic
+        call write_not_string                   ; write "not "
+        mov al, saved_modrm
+        mov bl, 1                               ; 1 = 16-bit operand
+        call decode_modrm_rm                    ; write operand (r/m field)
+        add offset_value, 2
+        jmp write_output
+        
+      handle_unrecognized_f7:
+        ; F7 with different reg field - treat as unknown
+        call pad_to_mnemonic
+        mov byte ptr [di], 'U'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'k'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        mov byte ptr [di], 'o'
+        inc di
+        mov byte ptr [di], 'w'
+        inc di
+        mov byte ptr [di], 'n'
+        inc di
+        add offset_value, 2
+        jmp write_output
+
       ; Unrecognized byte - output as "Unknown"
       handle_unrecognized:
         mov al, bl
@@ -1049,6 +1158,21 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       pop ax
       ret
     write_out_string ENDP
+
+    ; Output: writes "not " to output buffer
+    write_not_string PROC near
+      push ax
+      mov byte ptr [di], 'n'
+      inc di
+      mov byte ptr [di], 'o'
+      inc di
+      mov byte ptr [di], 't'
+      inc di
+      mov byte ptr [di], ' '
+      inc di
+      pop ax
+      ret
+    write_not_string ENDP
 
     ; Input: saved_modrm contains the ModR/M byte
     ; Output: displacement bytes written to output and saved in saved_disp_low/saved_disp_high
