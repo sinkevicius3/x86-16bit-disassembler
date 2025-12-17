@@ -72,7 +72,6 @@ start:
     
     rcr al, cl
     rcr byte ptr [bx+si], cl
-    rcr ax, cl
     
     rcr byte ptr es:[bx], 1
 

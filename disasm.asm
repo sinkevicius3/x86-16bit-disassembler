@@ -280,19 +280,19 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         cmp al, 0D7h
         je handle_xlat
 
-        ; [RCR reg/mem8, 1] (D0h ~ 1101 0000, reg field = 011)
+        ; [RCR reg/mem8, 1] (D0h ~ 1101 0000)
         cmp al, 0D0h
         je handle_rcr_D0
-        ; [RCR reg/mem16, 1] (D1h ~ 1101 0001, reg field = 011)
+        ; [RCR reg/mem16, 1] (D1h ~ 1101 0001)
         cmp al, 0D1h
         je handle_rcr_D1
-        ; [RCR reg/mem8, CL] (D2h ~ 1101 0010, reg field = 011)
+        ; [RCR reg/mem8, CL] (D2h ~ 1101 0010)
         cmp al, 0D2h
         je handle_rcr_D2
-        ; [RCR reg/mem16, CL] (D3h ~ 1101 0011, reg field = 011)
+        ; [RCR reg/mem16, CL] (D3h ~ 1101 0011)
         cmp al, 0D3h
         je handle_rcr_D3
-
+        
         ; [OUT imm8, AL] (E6h ~ 1110 0110)
         cmp al, 0E6h
         je handle_out_E6
@@ -359,10 +359,10 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         cmp al, 8Eh
         je handle_mov_8E
 
-        ; [NOT reg/mem8] (F6h ~ 1111 0110, reg field = 010)
+        ; [NOT reg/mem8] (F6h ~ 1111 0110)
         cmp al, 0F6h
         je handle_not_F6
-        ; [NOT reg/mem16] (F7h ~ 1111 0111, reg field = 010)
+        ; [NOT reg/mem16] (F7h ~ 1111 0111)
         cmp al, 0F7h
         je handle_not_F7
         
