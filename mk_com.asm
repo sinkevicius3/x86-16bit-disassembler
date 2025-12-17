@@ -35,9 +35,7 @@ start:
     mov [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
 
-<<<<<<< HEAD
     ; ....
-=======
     nop
 
     out 60h, al
@@ -82,7 +80,6 @@ start:
     xlat
     xlat
     xlat
->>>>>>> aaac22de2349d7b6034384c75ecb20235194b8d8
     
     mov ah, 4Ch             ; terminate
     int 21h
