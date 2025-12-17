@@ -260,7 +260,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       je handle_seg_prefix
       cmp al, 3Eh                               ; DS:
       je handle_seg_prefix
-      jmp check_mov_opcodes
+      jmp check_opcodes
       
       handle_seg_prefix:
         mov current_segment_prefix, al          ; save prefix
@@ -273,7 +273,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         jc disasm_end
         mov bl, al                              ; update opcode
       
-      check_mov_opcodes:
+      check_opcodes:
         mov al, bl
 
         ; [XLAT] (D7h ~ 1101 0111)
@@ -306,6 +306,8 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         ; [OUT DX, AX] (EFh ~ 1110 1111)
         cmp al, 0EFh
         je handle_out_EF
+
+        ; ~~~ MOV opcodes ~~~
         
         ; [MOV reg/mem8, reg8] (88h ~ 1000 1000)
         cmp al, 88h
@@ -370,10 +372,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV reg/mem8, reg8] (88h ~ 1000 1000)
       handle_mov_88:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -398,10 +397,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV reg/mem16, reg16] (89h ~ 1000 1001)
       handle_mov_89:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -426,10 +422,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV reg8, reg/mem8] (8Ah ~ 1000 1010)
       handle_mov_8A:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -454,10 +447,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV reg16, reg/mem16] (8Bh ~ 1000 1011)
       handle_mov_8B:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -482,10 +472,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV reg, immediate] (B0h-BFh ~ 1011 wreg)
       handle_mov_imm:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         
         ; Check if 8-bit or 16-bit (bit 3 of opcode)
         mov al, bl
@@ -549,10 +536,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV mem/reg8, immediate] (C6h ~ 1100 0110)
       handle_mov_C6:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -585,10 +569,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV mem/reg16, immediate] (C7h ~ 1100 0111)
       handle_mov_C7:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -630,10 +611,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV AL, memory] (A0h ~ 1010 0000)
       handle_mov_A0:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get offset low byte
         jc disasm_end
         mov cl, al
@@ -671,10 +649,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV AX, memory] (A1h ~ 1010 0001)
       handle_mov_A1:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov cl, al
@@ -712,10 +687,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV memory, AL] (A2h ~ 1010 0010)
       handle_mov_A2:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov cl, al
@@ -753,10 +725,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV memory, AX] (A3h ~ 1010 0011)
       handle_mov_A3:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov cl, al
@@ -794,10 +763,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV reg/mem, segment reg] (8Ch ~ 1000 1100)
       handle_mov_8C:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -822,10 +788,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [MOV segment reg, reg/mem] (8Eh ~ 1000 1110)
       handle_mov_8E:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte
         jc disasm_end
         mov saved_modrm, al
@@ -850,10 +813,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [OUT imm8, AL] (E6h ~ 1110 0110)
       handle_out_E6:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get immediate port number
         jc disasm_end
         mov cl, al                              ; save port in CL
@@ -879,10 +839,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [OUT imm8, AX] (E7h ~ 1110 0111)
       handle_out_E7:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get immediate port number
         jc disasm_end
         mov cl, al
@@ -908,10 +865,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [OUT DX, AL] (EEh ~ 1110 1110)
       handle_out_EE:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call pad_to_mnemonic
         call write_out_string
         mov byte ptr [di], 'D'
@@ -930,10 +884,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [OUT DX, AX] (EFh ~ 1110 1111)
       handle_out_EF:
         mov al, bl
-        call write_hex_byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call pad_to_mnemonic
         call write_out_string
         mov byte ptr [di], 'D'
@@ -952,10 +903,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
        ; [NOT reg/mem8] (F6h ~ 1111 0110)
       handle_not_F6:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -969,7 +917,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         shr al, 3
         and al, 07h                             ; extract reg field
         cmp al, 2                               ; must be 010 (2)
-        jne handle_unrecognized_f6              ; if not, it's a different F6 instruction
+        jne handle_unrecognized_dbl_inc      ; if not, it's a different F6 instruction
         
         call read_displacement
         call pad_to_mnemonic
@@ -979,34 +927,11 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         call decode_modrm_rm                    ; write operand (r/m field)
         add offset_value, 2
         jmp write_output
-        
-      handle_unrecognized_f6:
-        ; F6 with different reg field - treat as unknown
-        call pad_to_mnemonic
-        mov byte ptr [di], 'U'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'k'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'o'
-        inc di
-        mov byte ptr [di], 'w'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        add offset_value, 2
-        jmp write_output
 
       ; [NOT reg/mem16] (F7h ~ 1111 0111)
       handle_not_F7:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -1020,7 +945,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         shr al, 3
         and al, 07h                             ; extract reg field
         cmp al, 2                               ; must be 010 (2)
-        jne handle_unrecognized_f7              ; if not, it's a different F7 instruction
+        jne handle_unrecognized_dbl_inc      ; if not, it's a different F7 instruction
         
         call read_displacement
         call pad_to_mnemonic
@@ -1030,34 +955,11 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         call decode_modrm_rm                    ; write operand (r/m field)
         add offset_value, 2
         jmp write_output
-        
-      handle_unrecognized_f7:
-        ; F7 with different reg field - treat as unknown
-        call pad_to_mnemonic
-        mov byte ptr [di], 'U'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'k'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'o'
-        inc di
-        mov byte ptr [di], 'w'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        add offset_value, 2
-        jmp write_output
 
       ; [XLAT] (D7h ~ 1101 0111)
       handle_xlat:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call pad_to_mnemonic
         call write_xlat_string                  ; write "xlat"
         inc offset_value
@@ -1066,10 +968,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [RCR reg/mem8, 1] (D0h ~ 1101 0000)
       handle_rcr_D0:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -1083,7 +982,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         shr al, 3
         and al, 07h                             ; extract reg field
         cmp al, 3                               ; must be 011 (3)
-        jne handle_unrecognized_d0              ; if not, it's a different D0 instruction
+        jne handle_unrecognized_dbl_inc      ; if not, it's a different D0 instruction
         
         call read_displacement
         call pad_to_mnemonic
@@ -1098,32 +997,10 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         add offset_value, 2
         jmp write_output
         
-      handle_unrecognized_d0:
-        call pad_to_mnemonic
-        mov byte ptr [di], 'U'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'k'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'o'
-        inc di
-        mov byte ptr [di], 'w'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        add offset_value, 2
-        jmp write_output
-
       ; [RCR reg/mem16, 1] (D1h ~ 1101 0001)
       handle_rcr_D1:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -1137,7 +1014,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         shr al, 3
         and al, 07h                             ; extract reg field
         cmp al, 3                               ; must be 011 (3)
-        jne handle_unrecognized_d1              ; if not, it's a different D1 instruction
+        jne handle_unrecognized_dbl_inc      ; if not, it's a different D1 instruction
         
         call read_displacement
         call pad_to_mnemonic
@@ -1152,32 +1029,10 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         add offset_value, 2
         jmp write_output
         
-      handle_unrecognized_d1:
-        call pad_to_mnemonic
-        mov byte ptr [di], 'U'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'k'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'o'
-        inc di
-        mov byte ptr [di], 'w'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        add offset_value, 2
-        jmp write_output
-
       ; [RCR reg/mem8, CL] (D2h ~ 1101 0010)
       handle_rcr_D2:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -1191,7 +1046,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         shr al, 3
         and al, 07h                             ; extract reg field
         cmp al, 3                               ; must be 011 (3)
-        jne handle_unrecognized_d2              ; if not, it's a different D2 instruction
+        jne handle_unrecognized_dbl_inc      ; if not, it's a different D2 instruction
         
         call read_displacement
         call pad_to_mnemonic
@@ -1204,25 +1059,6 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         mov byte ptr [di], 'C'
         inc di
         mov byte ptr [di], 'L'
-        inc di
-        add offset_value, 2
-        jmp write_output
-        
-      handle_unrecognized_d2:
-        call pad_to_mnemonic
-        mov byte ptr [di], 'U'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'k'
-        inc di
-        mov byte ptr [di], 'n'
-        inc di
-        mov byte ptr [di], 'o'
-        inc di
-        mov byte ptr [di], 'w'
-        inc di
-        mov byte ptr [di], 'n'
         inc di
         add offset_value, 2
         jmp write_output
@@ -1230,10 +1066,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; [RCR reg/mem16, CL] (D3h ~ 1101 0011)
       handle_rcr_D3:
         mov al, bl
-        call write_hex_byte                     ; write opcode
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call get_next_byte                      ; get ModR/M byte
         jc disasm_end
         mov saved_modrm, al
@@ -1247,7 +1080,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         shr al, 3
         and al, 07h                             ; extract reg field
         cmp al, 3                               ; must be 011 (3)
-        jne handle_unrecognized_d3              ; if not, it's a different D3 instruction
+        jne handle_unrecognized_dbl_inc      ; if not, it's a different D3 instruction
         
         call read_displacement
         call pad_to_mnemonic
@@ -1264,7 +1097,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
         add offset_value, 2
         jmp write_output
         
-      handle_unrecognized_d3:
+      handle_unrecognized_dbl_inc:
         call pad_to_mnemonic
         mov byte ptr [di], 'U'
         inc di
@@ -1286,10 +1119,7 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       ; Unrecognized byte - output as "Unknown"
       handle_unrecognized:
         mov al, bl
-        call write_hex_byte                     ; write opcode byte
-        mov al, ' '
-        mov [di], al
-        inc di
+        call write_opcode
         call pad_to_mnemonic
         ; Write "Unknown"
         mov byte ptr [di], 'U'
@@ -1879,5 +1709,15 @@ FILENAME_SIZE EQU 12                            ; maximum filename length (8.3 f
       pop ax
       ret
     decode_modrm_reg_16 ENDP
+
+    ; Input: AL = opcode byte to write
+    ; Output: writes opcode as hex followed by a space
+    write_opcode PROC near
+      call write_hex_byte
+      mov al, ' '
+      mov [di], al
+      inc di
+      ret
+    write_opcode ENDP
 
 end start

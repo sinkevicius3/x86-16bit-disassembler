@@ -35,7 +35,6 @@ start:
     mov [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
 
-    ; ....
     nop
 
     out 60h, al
