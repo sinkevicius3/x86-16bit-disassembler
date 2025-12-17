@@ -22,18 +22,20 @@ start:
 
     nop
 
-    mov es, word ptr [bx]
-    mov word ptr [di+6], ds
-
-    nop
-
-    mov ds:[1000h], ax
+    mov es, [bx]
+    mov [di+6], ds
 
     nop
 
     mov al, 42h
+    mov ds:[10h], al
+
     mov [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
+
+    nop
+
+    mov es:[1000h], ax
 
     nop
 
