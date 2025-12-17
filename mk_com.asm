@@ -32,10 +32,57 @@ start:
     nop
 
     mov al, 42h
-    mov word ptr [bx+di+100h], 0CDEFh
+    mov [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
 
+<<<<<<< HEAD
     ; ....
+=======
+    nop
+
+    out 60h, al
+    out 70h, ax
+    
+    out dx, al
+    out dx, ax
+    
+    mov ax, 1234h
+    out 80h, ax
+
+    nop
+
+    not al
+    not bl
+    not cl
+    
+    not ax
+    not bx
+    not cx
+    
+    not byte ptr [bx]
+    not word ptr [bx]
+    not byte ptr [bx+si]
+    not word ptr [bp+10h]
+
+    nop
+
+    rcr al, 1 
+    rcr bl, 1
+    rcr ax, 1 
+    rcr word ptr [bx], 1 
+    
+    rcr al, cl
+    rcr byte ptr [bx+si], cl
+    rcr ax, cl
+    
+    rcr byte ptr es:[bx], 1
+
+    nop
+
+    xlat
+    xlat
+    xlat
+>>>>>>> aaac22de2349d7b6034384c75ecb20235194b8d8
     
     mov ah, 4Ch             ; terminate
     int 21h
