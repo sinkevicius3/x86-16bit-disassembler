@@ -34,8 +34,10 @@ start:
     mov al, 42h
     mov word ptr [bx+di+100h], 0CDEFh
     mov ax, [bp+1234h]
+
+    ; ....
     
-    mov ah, 4Ch
+    mov ah, 4Ch             ; terminate
     int 21h
 
 end start
